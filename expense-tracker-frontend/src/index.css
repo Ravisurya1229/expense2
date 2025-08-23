@@ -1,0 +1,9 @@
+/* Tailwind v4: only one import is needed */
+@import "tailwindcss";
+
+html, body, #root { height: 100%; }
+* { scrollbar-width: thin; scrollbar-color: #a64dff #334155; }
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-track { background: #334155; }
+*::-webkit-scrollbar-thumb { background-color: #a64dff; border-radius: 9999px; }
+::selection { background: #a64dff33; }
