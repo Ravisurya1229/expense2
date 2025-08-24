@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { loginUser } from "../api";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -7,14 +8,19 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Dummy validation (replace with backend call later)
-    if (email && password) {
-      localStorage.setItem("user", JSON.stringify({ email }));
-      navigate("/dashboard");
-    } else {
-      setError("Please enter both email and password");
+    try {
+      const res = await loginUser({ email, password });
+      if (res.token) {
+        localStorage.setItem("token", res.token); // save JWT
+        localStorage.setItem("user", JSON.stringify(res.user));
+        navigate("/dashboard"); // redirect
+      } else {
+        setError(res.error || "Login failed");
+      }
+    } catch (err) {
+      setError("Server error, try again later");
     }
   };
 
@@ -24,7 +30,6 @@ export default function Login() {
         <h1 className="text-2xl font-bold text-center mb-6">Sign In</h1>
         {error && <p className="text-red-500 text-center mb-4">{error}</p>}
         <form onSubmit={handleSubmit}>
-          <label className="block mb-2 text-gray-700">Email</label>
           <input
             type="email"
             value={email}
@@ -32,7 +37,6 @@ export default function Login() {
             className="w-full p-2 border rounded mb-4"
             placeholder="Enter your email"
           />
-          <label className="block mb-2 text-gray-700">Password</label>
           <input
             type="password"
             value={password}

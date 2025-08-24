@@ -1,22 +1,34 @@
-import React, { useState, useContext } from "react";
-import { Link } from "react-router-dom";
-import { AuthContext } from "../utils/AuthContext";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { signupUser } from "../api";
 
 export default function Signup() {
-  const { signup } = useContext(AuthContext);
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email || !password || !confirm) {
       setError("All fields are required");
-    } else if (password !== confirm) {
+      return;
+    }
+    if (password !== confirm) {
       setError("Passwords do not match");
-    } else {
-      signup(email); // Replace with backend API later
+      return;
+    }
+
+    try {
+      const res = await signupUser({ email, password });
+      if (res.message) {
+        navigate("/login"); // go to login after successful signup
+      } else {
+        setError(res.error || "Signup failed");
+      }
+    } catch (err) {
+      setError("Server error, try again later");
     }
   };
 
@@ -26,7 +38,6 @@ export default function Signup() {
         <h1 className="text-2xl font-bold text-center mb-6">Sign Up</h1>
         {error && <p className="text-red-500 text-center mb-4">{error}</p>}
         <form onSubmit={handleSubmit}>
-          <label className="block mb-2 text-gray-700">Email</label>
           <input
             type="email"
             className="w-full p-2 border rounded mb-4"
@@ -34,7 +45,6 @@ export default function Signup() {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Enter email"
           />
-          <label className="block mb-2 text-gray-700">Password</label>
           <input
             type="password"
             className="w-full p-2 border rounded mb-4"
@@ -42,7 +52,6 @@ export default function Signup() {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Enter password"
           />
-          <label className="block mb-2 text-gray-700">Confirm Password</label>
           <input
             type="password"
             className="w-full p-2 border rounded mb-6"

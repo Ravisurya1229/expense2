@@ -7,11 +7,13 @@ const request = async (url, options = {}) => {
     const res = await fetch(`${BASE_URL}${url}`, {
       headers: {
         "Content-Type": "application/json",
+        ...(options.headers || {}),
       },
       ...options,
     });
     if (!res.ok) {
-      throw new Error(`HTTP error! status: ${res.status}`);
+      const errorData = await res.json().catch(() => null);
+      throw new Error(errorData?.error || `HTTP error! status: ${res.status}`);
     }
     return await res.json();
   } catch (err) {
@@ -20,22 +22,53 @@ const request = async (url, options = {}) => {
   }
 };
 
+// Auth
+export const loginUser = (credentials) =>
+  request("/auth/login", {
+    method: "POST",
+    body: JSON.stringify(credentials),
+  });
+
+export const signupUser = (userData) =>
+  request("/auth/signup", {
+    method: "POST",
+    body: JSON.stringify(userData),
+  });
+
 // Expenses
-export const fetchExpenses = () => request("/expenses");
-export const addExpense = (expense) =>
+export const fetchExpenses = (token) =>
+  request("/expenses", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+export const addExpense = (expense, token) =>
   request("/expenses", {
     method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(expense),
   });
-export const deleteExpense = (id) =>
-  request(`/expenses/${id}`, { method: "DELETE" });
+
+export const deleteExpense = (id, token) =>
+  request(`/expenses/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
 
 // Income
-export const fetchIncome = () => request("/income");
-export const addIncome = (income) =>
+export const fetchIncome = (token) =>
+  request("/income", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+export const addIncome = (income, token) =>
   request("/income", {
     method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(income),
   });
-export const deleteIncome = (id) =>
-  request(`/income/${id}`, { method: "DELETE" });
+
+export const deleteIncome = (id, token) =>
+  request(`/income/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
