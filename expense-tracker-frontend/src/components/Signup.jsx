@@ -1,4 +1,3 @@
-// src/components/Signup.jsx
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { signupUser } from "../api";
@@ -7,13 +6,14 @@ export default function Signup() {
   const navigate = useNavigate();
   const [name, setName]         = useState("");
   const [email, setEmail]       = useState("");
+  const [phone, setPhone]       = useState(""); // NEW
   const [password, setPassword] = useState("");
   const [confirm, setConfirm]   = useState("");
   const [error, setError]       = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!name || !email || !password || !confirm) {
+    if (!name || !email || !phone || !password || !confirm) {
       setError("All fields are required");
       return;
     }
@@ -23,7 +23,7 @@ export default function Signup() {
     }
 
     try {
-      const res = await signupUser({ name, email, password });
+      const res = await signupUser({ name, email, password, phone }); // include phone
       if (res.message) {
         navigate("/login");
       } else {
@@ -53,6 +53,13 @@ export default function Signup() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Enter email"
+          />
+          <input
+            type="tel"
+            className="w-full p-2 border rounded mb-4"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="Enter phone (e.g. +91 98xxxxxxx)"
           />
           <input
             type="password"
